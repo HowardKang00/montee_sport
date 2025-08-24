@@ -1,0 +1,25 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+model Order {
+  id              int      @id @default(autoincrement()) // internal UUID
+  externalId      String   @unique              // used with Xendit (external reference)
+  amount          Int
+  status          String   @default("pending")  // pending | PAID | EXPIRED
+  payerEmail      String
+  description     String?
+  invoiceUrl      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
