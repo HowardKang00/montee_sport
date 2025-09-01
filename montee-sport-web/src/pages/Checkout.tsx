@@ -20,7 +20,7 @@ export default function Checkout() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center p-6 bg-gray-50">
+    <div className="min-h-screen flex flex-col items-center p-6 bg-gray-50 text-gray-700">
       <motion.h1
         className="text-3xl font-bold mb-6"
         initial={{ opacity: 0, y: -20 }}
@@ -29,7 +29,7 @@ export default function Checkout() {
         Checkout
       </motion.h1>
 
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 text-gray-700">
         {cart.length === 0 ? (
           <motion.p
             className="text-gray-500 text-center"
@@ -54,20 +54,20 @@ export default function Checkout() {
                     <div className="flex gap-2 mt-1 items-center">
                       <button
                         onClick={() => updateQty(item.id, Math.max(1, item.qty - 1))}
-                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 transition"
+                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 transition text-gray-700"
                       >
                         -
                       </button>
                       <span>{item.qty}</span>
                       <button
                         onClick={() => updateQty(item.id, item.qty + 1)}
-                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 transition"
+                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 transition text-gray-700"
                       >
                         +
                       </button>
                       <button
                         onClick={() => removeFromCart(item.id)}
-                        className="ml-2 text-red-500 hover:text-red-700 transition"
+                        className="ml-2 text-red-500 hover:text-red-700 transition text-gray-700"
                       >
                         Remove
                       </button>
@@ -79,7 +79,7 @@ export default function Checkout() {
             </ul>
 
             <motion.div
-              className="flex justify-between items-center mt-6 text-lg font-semibold"
+              className="flex justify-between items-center mt-6 text-lg font-semibold text-gray-700"
               animate={{ opacity: [0.5, 1], scale: [0.95, 1] }}
               transition={{ duration: 0.3 }}
             >

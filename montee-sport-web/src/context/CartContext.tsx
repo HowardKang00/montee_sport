@@ -7,6 +7,7 @@ type CartItem = {
   price: number;
   qty: number;
   img: string;
+  size: string;
 };
 
 type CartContextType = {
@@ -32,7 +33,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id ? { ...i, qty: i.qty + item.qty } : i
+          i.id === item.id && i.size === item.size ? { ...i, qty: i.qty + item.qty } : i
         );
       }
       return [...prev, item];

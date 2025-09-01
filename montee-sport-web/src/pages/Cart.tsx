@@ -55,7 +55,7 @@ export default function Cart() {
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: i * 0.05 }}
                   >
-                    <span className="font-medium">{item.name} x{item.qty}</span>
+                    <span className="font-medium">{item.name} ({item.size}) x{item.qty}</span>
                     <span className="text-gray-700">${item.price * item.qty}</span>
                   </motion.li>
                 ))}
