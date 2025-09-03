@@ -1,0 +1,416 @@
+{
+  "sizes": ["2XS","XS","S","M","L","XL","2XL","3XL","4XL"],
+  "products": [
+    {
+        "id": "men-running-accelerated_series-velocity_green",
+        "name": "Accelerated Series Velocity Green",
+        "gender": "men",
+        "category": "running",
+        "series": "accelerated_series",
+        "colorway": "velocity_green",
+        "price": 279000,
+        "discount": 11,
+        "images": [
+        "../../images/men/running/accelerated_series/velocity_green/accelerated_series_velocity_green_0.jpg",
+        "../../images/men/running/accelerated_series/velocity_green/accelerated_series_velocity_green_1.jpg",
+        "../../images/men/running/accelerated_series/velocity_green/accelerated_series_velocity_green_2.jpg",
+        "../../images/men/running/accelerated_series/velocity_green/accelerated_series_velocity_green_3.jpg",
+        "../../images/men/running/accelerated_series/velocity_green/accelerated_series_velocity_green_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/men/running/sizechart_singlet.jpg",
+        "../../images/men/running/sizechart_shirt.jpg"
+        ]
+    },
+    {
+        "id": "men-running-accelerated_series-ignite_yellow",
+        "name": "Accelerated Series Ignite Yellow",
+        "gender": "men",
+        "category": "running",
+        "series": "accelerated_series",
+        "colorway": "ignite_yellow",
+        "price": 279000,
+        "discount": 11,
+        "images": [
+        "../../images/men/running/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_0.jpg",
+        "../../images/men/running/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_1.jpg",
+        "../../images/men/running/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_2.jpg",
+        "../../images/men/running/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_3.jpg",
+        "../../images/men/running/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/men/running/sizechart_singlet.jpg",
+        "../../images/men/running/sizechart_shirt.jpg"
+        ]
+    },
+    {
+        "id": "men-running-markv_series-heat_voltage",
+        "name": "Mark V Series Heat Voltage",
+        "gender": "men",
+        "category": "running",
+        "series": "markv_series",
+        "colorway": "heat_voltage",
+        "price": 279000,
+        "discount": 11,
+        "images": [
+        "../../images/men/running/markv_series/heat_voltage/markv_series_heat_voltage_0.jpg",
+        "../../images/men/running/markv_series/heat_voltage/markv_series_heat_voltage_1.jpg",
+        "../../images/men/running/markv_series/heat_voltage/markv_series_heat_voltage_2.jpg",
+        "../../images/men/running/markv_series/heat_voltage/markv_series_heat_voltage_3.jpg",
+        "../../images/men/running/markv_series/heat_voltage/markv_series_heat_voltage_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/men/running/sizechart_singlet.jpg",
+        "../../images/men/running/sizechart_shirt.jpg"
+        ]
+    },
+    {
+        "id": "men-running-markv_series-power_blaze",
+        "name": "Mark V Series Power Blaze",
+        "gender": "men",
+        "category": "running",
+        "series": "markv_series",
+        "colorway": "power_blaze",
+        "price": 279000,
+        "discount": 11,
+        "images": [
+        "../../images/men/running/markv_series/power_blaze/markv_series_power_blaze_0.jpg",
+        "../../images/men/running/markv_series/power_blaze/markv_series_power_blaze_1.jpg",
+        "../../images/men/running/markv_series/power_blaze/markv_series_power_blaze_2.jpg",
+        "../../images/men/running/markv_series/power_blaze/markv_series_power_blaze_3.jpg",
+        "../../images/men/running/markv_series/power_blaze/markv_series_power_blaze_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/men/running/sizechart_singlet.jpg",
+        "../../images/men/running/sizechart_shirt.jpg"
+        ]
+    },
+
+    {
+        "id": "men-cycling-accelerated_series-velocity_green",
+        "name": "Accelerated Series Velocity Green",
+        "gender": "men",
+        "category": "cycling",
+        "series": "accelerated_series",
+        "colorway": "velocity_green",
+        "price": 799000,
+        "discount": 11,
+        "images": [
+        "../../images/men/cycling/accelerated_series/velocity_green/accelerated_series_velocity_green_0.jpg",
+        "../../images/men/cycling/accelerated_series/velocity_green/accelerated_series_velocity_green_1.jpg",
+        "../../images/men/cycling/accelerated_series/velocity_green/accelerated_series_velocity_green_2.jpg",
+        "../../images/men/cycling/accelerated_series/velocity_green/accelerated_series_velocity_green_3.jpg",
+        "../../images/men/cycling/accelerated_series/velocity_green/accelerated_series_velocity_green_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/men/cycling/sizechart.jpg"
+        ]
+    },
+    {
+        "id": "men-cycling-accelerated_series-ignite_yellow",
+        "name": "Accelerated Series Ignite Yellow",
+        "gender": "men",
+        "category": "cycling",
+        "series": "accelerated_series",
+        "colorway": "ignite_yellow",
+        "price": 799000,
+        "discount": 11,
+        "images": [
+        "../../images/men/cycling/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_0.jpg",
+        "../../images/men/cycling/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_1.jpg",
+        "../../images/men/cycling/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_2.jpg",
+        "../../images/men/cycling/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_3.jpg",
+        "../../images/men/cycling/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/men/cycling/sizechart.jpg"
+        ]
+    },
+    {
+        "id": "men-cycling-markv_series-heat_voltage",
+        "name": "Mark V Series Heat Voltage",
+        "gender": "men",
+        "category": "cycling",
+        "series": "markv_series",
+        "colorway": "heat_voltage",
+        "price": 799000,
+        "discount": 11,
+        "images": [
+        "../../images/men/cycling/markv_series/heat_voltage/markv_series_heat_voltage_0.jpg",
+        "../../images/men/cycling/markv_series/heat_voltage/markv_series_heat_voltage_1.jpg",
+        "../../images/men/cycling/markv_series/heat_voltage/markv_series_heat_voltage_2.jpg",
+        "../../images/men/cycling/markv_series/heat_voltage/markv_series_heat_voltage_3.jpg",
+        "../../images/men/cycling/markv_series/heat_voltage/markv_series_heat_voltage_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/men/cycling/sizechart.jpg"
+        ]
+    },
+    {
+        "id": "men-cycling-markv_series-power_blaze",
+        "name": "Mark V Series Power Blaze",
+        "gender": "men",
+        "category": "cycling",
+        "series": "markv_series",
+        "colorway": "power_blaze",
+        "price": 799000,
+        "discount": 11,
+        "images": [
+        "../../images/men/cycling/markv_series/power_blaze/markv_series_power_blaze_0.jpg",
+        "../../images/men/cycling/markv_series/power_blaze/markv_series_power_blaze_1.jpg",
+        "../../images/men/cycling/markv_series/power_blaze/markv_series_power_blaze_2.jpg",
+        "../../images/men/cycling/markv_series/power_blaze/markv_series_power_blaze_3.jpg",
+        "../../images/men/cycling/markv_series/power_blaze/markv_series_power_blaze_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/men/cycling/sizechart.jpg"
+        ]
+    },
+    {
+        "id": "men-padel-markv_series-heat_voltage",
+        "name": "Mark V Series Heat Voltage",
+        "gender": "men",
+        "category": "padel",
+        "series": "markv_series",
+        "colorway": "heat_voltage",
+        "price": 299000,
+        "discount": 11,
+        "images": [
+        "../../images/men/padel/markv_series/heat_voltage/markv_series_heat_voltage_0.jpg",
+        "../../images/men/padel/markv_series/heat_voltage/markv_series_heat_voltage_1.jpg",
+        "../../images/men/padel/markv_series/heat_voltage/markv_series_heat_voltage_2.jpg",
+        "../../images/men/padel/markv_series/heat_voltage/markv_series_heat_voltage_3.jpg",
+        "../../images/men/padel/markv_series/heat_voltage/markv_series_heat_voltage_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/men/padel/sizechart.jpg"
+        ]
+    },
+    {
+        "id": "men-padel-markv_series-power_blaze",
+        "name": "Mark V Series Power Blaze",
+        "gender": "men",
+        "category": "padel",
+        "series": "markv_series",
+        "colorway": "power_blaze",
+        "price": 279000,
+        "discount": 11,
+        "images": [
+        "../../images/men/padel/markv_series/power_blaze/markv_series_power_blaze_0.jpg",
+        "../../images/men/padel/markv_series/power_blaze/markv_series_power_blaze_1.jpg",
+        "../../images/men/padel/markv_series/power_blaze/markv_series_power_blaze_2.jpg",
+        "../../images/men/padel/markv_series/power_blaze/markv_series_power_blaze_3.jpg",
+        "../../images/men/padel/markv_series/power_blaze/markv_series_power_blaze_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/men/padel/sizechart.jpg"
+        ]
+    },
+
+    {
+        "id": "women-running-accelerated_series-velocity_green",
+        "name": "Accelerated Series Velocity Green",
+        "gender": "women",
+        "category": "running",
+        "series": "accelerated_series",
+        "colorway": "velocity_green",
+        "price": 279000,
+        "discount": 11,
+        "images": [
+        "../../images/women/running/accelerated_series/velocity_green/accelerated_series_velocity_green_0.jpg",
+        "../../images/women/running/accelerated_series/velocity_green/accelerated_series_velocity_green_1.jpg",
+        "../../images/women/running/accelerated_series/velocity_green/accelerated_series_velocity_green_2.jpg",
+        "../../images/women/running/accelerated_series/velocity_green/accelerated_series_velocity_green_3.jpg",
+        "../../images/women/running/accelerated_series/velocity_green/accelerated_series_velocity_green_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/women/running/sizechart_singlet.jpg",
+        "../../images/women/running/sizechart_shirt.jpg"
+        ]
+    },
+    {
+        "id": "women-running-accelerated_series-ignite_yellow",
+        "name": "Accelerated Series Ignite Yellow",
+        "gender": "women",
+        "category": "running",
+        "series": "accelerated_series",
+        "colorway": "ignite_yellow",
+        "price": 279000,
+        "discount": 11,
+        "images": [
+        "../../images/women/running/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_0.jpg",
+        "../../images/women/running/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_1.jpg",
+        "../../images/women/running/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_2.jpg",
+        "../../images/women/running/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_3.jpg",
+        "../../images/women/running/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/women/running/sizechart_singlet.jpg",
+        "../../images/women/running/sizechart_shirt.jpg"
+        ]
+    },
+    {
+        "id": "women-running-markv_series-heat_voltage",
+        "name": "Mark V Series Heat Voltage",
+        "gender": "women",
+        "category": "running",
+        "series": "markv_series",
+        "colorway": "heat_voltage",
+        "price": 279000,
+        "discount": 11,
+        "images": [
+        "../../images/women/running/markv_series/heat_voltage/markv_series_heat_voltage_0.jpg",
+        "../../images/women/running/markv_series/heat_voltage/markv_series_heat_voltage_1.jpg",
+        "../../images/women/running/markv_series/heat_voltage/markv_series_heat_voltage_2.jpg",
+        "../../images/women/running/markv_series/heat_voltage/markv_series_heat_voltage_3.jpg",
+        "../../images/women/running/markv_series/heat_voltage/markv_series_heat_voltage_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/women/running/sizechart_singlet.jpg",
+        "../../images/women/running/sizechart_shirt.jpg"
+        ]
+    },
+    {
+        "id": "women-running-markv_series-power_blaze",
+        "name": "Mark V Series Power Blaze",
+        "gender": "women",
+        "category": "running",
+        "series": "markv_series",
+        "colorway": "power_blaze",
+        "price": 279000,
+        "discount": 11,
+        "images": [
+        "../../images/women/running/markv_series/power_blaze/markv_series_power_blaze_0.jpg",
+        "../../images/women/running/markv_series/power_blaze/markv_series_power_blaze_1.jpg",
+        "../../images/women/running/markv_series/power_blaze/markv_series_power_blaze_2.jpg",
+        "../../images/women/running/markv_series/power_blaze/markv_series_power_blaze_3.jpg",
+        "../../images/women/running/markv_series/power_blaze/markv_series_power_blaze_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/women/running/sizechart_singlet.jpg",
+        "../../images/women/running/sizechart_shirt.jpg"
+        ]
+    },
+
+    {
+        "id": "women-cycling-accelerated_series-velocity_green",
+        "name": "Accelerated Series Velocity Green",
+        "gender": "women",
+        "category": "cycling",
+        "series": "accelerated_series",
+        "colorway": "velocity_green",
+        "price": 799000,
+        "discount": 11,
+        "images": [
+        "../../images/women/cycling/accelerated_series/velocity_green/accelerated_series_velocity_green_0.jpg",
+        "../../images/women/cycling/accelerated_series/velocity_green/accelerated_series_velocity_green_1.jpg",
+        "../../images/women/cycling/accelerated_series/velocity_green/accelerated_series_velocity_green_2.jpg",
+        "../../images/women/cycling/accelerated_series/velocity_green/accelerated_series_velocity_green_3.jpg",
+        "../../images/women/cycling/accelerated_series/velocity_green/accelerated_series_velocity_green_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/women/cycling/sizechart.jpg"
+        ]
+    },
+    {
+        "id": "women-cycling-accelerated_series-ignite_yellow",
+        "name": "Accelerated Series Ignite Yellow",
+        "gender": "women",
+        "category": "cycling",
+        "series": "accelerated_series",
+        "colorway": "ignite_yellow",
+        "price": 799000,
+        "discount": 11,
+        "images": [
+        "../../images/women/cycling/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_0.jpg",
+        "../../images/women/cycling/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_1.jpg",
+        "../../images/women/cycling/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_2.jpg",
+        "../../images/women/cycling/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_3.jpg",
+        "../../images/women/cycling/accelerated_series/ignite_yellow/accelerated_series_ignite_yellow_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/women/cycling/sizechart.jpg"
+        ]
+    },
+    {
+        "id": "women-cycling-markv_series-heat_voltage",
+        "name": "Mark V Series Heat Voltage",
+        "gender": "women",
+        "category": "cycling",
+        "series": "markv_series",
+        "colorway": "heat_voltage",
+        "price": 799000,
+        "discount": 11,
+        "images": [
+        "../../images/women/cycling/markv_series/heat_voltage/markv_series_heat_voltage_0.jpg",
+        "../../images/women/cycling/markv_series/heat_voltage/markv_series_heat_voltage_1.jpg",
+        "../../images/women/cycling/markv_series/heat_voltage/markv_series_heat_voltage_2.jpg",
+        "../../images/women/cycling/markv_series/heat_voltage/markv_series_heat_voltage_3.jpg",
+        "../../images/women/cycling/markv_series/heat_voltage/markv_series_heat_voltage_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/women/cycling/sizechart.jpg"
+        ]
+    },
+    {
+        "id": "women-cycling-markv_series-power_blaze",
+        "name": "Mark V Series Power Blaze",
+        "gender": "women",
+        "category": "cycling",
+        "series": "markv_series",
+        "colorway": "power_blaze",
+        "price": 799000,
+        "discount": 11,
+        "images": [
+        "../../images/women/cycling/markv_series/power_blaze/markv_series_power_blaze_0.jpg",
+        "../../images/women/cycling/markv_series/power_blaze/markv_series_power_blaze_1.jpg",
+        "../../images/women/cycling/markv_series/power_blaze/markv_series_power_blaze_2.jpg",
+        "../../images/women/cycling/markv_series/power_blaze/markv_series_power_blaze_3.jpg",
+        "../../images/women/cycling/markv_series/power_blaze/markv_series_power_blaze_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/women/cycling/sizechart.jpg"
+        ]
+    },
+    {
+        "id": "women-padel-markv_series-heat_voltage",
+        "name": "Mark V Series Heat Voltage",
+        "gender": "women",
+        "category": "padel",
+        "series": "markv_series",
+        "colorway": "heat_voltage",
+        "price": 299000,
+        "discount": 11,
+        "images": [
+        "../../images/women/padel/markv_series/heat_voltage/markv_series_heat_voltage_0.jpg",
+        "../../images/women/padel/markv_series/heat_voltage/markv_series_heat_voltage_1.jpg",
+        "../../images/women/padel/markv_series/heat_voltage/markv_series_heat_voltage_2.jpg",
+        "../../images/women/padel/markv_series/heat_voltage/markv_series_heat_voltage_3.jpg",
+        "../../images/women/padel/markv_series/heat_voltage/markv_series_heat_voltage_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/women/padel/sizechart.jpg"
+        ]
+    },
+    {
+        "id": "women-padel-markv_series-power_blaze",
+        "name": "Mark V Series Power Blaze",
+        "gender": "women",
+        "category": "padel",
+        "series": "markv_series",
+        "colorway": "power_blaze",
+        "price": 279000,
+        "discount": 11,
+        "images": [
+        "../../images/women/padel/markv_series/power_blaze/markv_series_power_blaze_0.jpg",
+        "../../images/women/padel/markv_series/power_blaze/markv_series_power_blaze_1.jpg",
+        "../../images/women/padel/markv_series/power_blaze/markv_series_power_blaze_2.jpg",
+        "../../images/women/padel/markv_series/power_blaze/markv_series_power_blaze_3.jpg",
+        "../../images/women/padel/markv_series/power_blaze/markv_series_power_blaze_4.jpg"
+        ],
+        "sizeCharts": [
+        "../../images/women/padel/sizechart.jpg"
+        ]
+    }
+    ]
+}

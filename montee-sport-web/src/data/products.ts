@@ -1,5 +1,9 @@
 // web/src/data/products.ts
-interface Product {
+// Single source of truth: products.json
+// Ensure tsconfig.json has "resolveJsonModule": true
+import rawData from "./products.json";
+
+export interface Product {
   id: string;
   name: string;
   gender: "men" | "women";
@@ -7,72 +11,57 @@ interface Product {
   series: string;
   colorway: string;
   price: number;
-  images: string[];
-  sizeCharts: string[]; // ⬅️ allow multiple
-  sizes: string[]; 
+  discount: number;
+  images: string[];     // resolved URLs (bundler) where possible
+  sizeCharts: string[]; // resolved URLs (bundler) where possible
+  sizes: string[];
 }
 
-// Import all images using Vite’s glob import
-const images = import.meta.glob("../../images/**/*.{jpg,png,jpeg}", { eager: true });
+// fallback sizes if JSON does not provide `sizes`
+const fallbackSizes = ["2XS", "XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"];
 
-// Organize products
-export const products: Product[] = [];
+// import all images (eager so we can map to module URLs)
+const imagesMap = import.meta.glob("../../images/**/*.{jpg,png,jpeg}", { eager: true }) as Record<string, any>;
 
-function addProduct(
-  gender: "men" | "women",
-  category: "running" | "cycling" | "padel",
-  series: string,
-  colorway: string,
-  price: number = 100 // Default price, change as needed
-) {
-  // Build path
-  const folder = `../../images/${gender}/${category}/${series}/${colorway}`;
-  const imgs: string[] = [];
+/**
+ * Resolve a path from JSON to the module's exported URL (if present).
+ * - First tries direct key match (the same string used in JSON).
+ * - If not found, tries a endsWith match (useful if glob keys differ slightly).
+ * - If still not found, returns the raw path and logs a warning.
+ */
+function resolveImagePath(jsonPath: string): string {
+  if (!jsonPath) return "";
+  // direct lookup (keys from import.meta.glob will match the same literal path if relative)
+  const direct = imagesMap[jsonPath];
+  if (direct) return direct.default ?? direct;
 
-  // Collect all images matching the pattern
-  Object.entries(images).forEach(([path, mod]) => {
-    if (path.startsWith(folder)) {
-      imgs.push((mod as any).default);
-    }
-  });
+  // fallback: sometimes the glob keys differ in prefix; try endsWith match
+  const matchEntry = Object.entries(imagesMap).find(([k]) => k.endsWith(jsonPath.replace(/^\.*\/+/, "")));
+  if (matchEntry) return (matchEntry[1] as any).default ?? matchEntry[1];
 
-  // Get size charts
-  let sizeCharts: string[] = [];
+  console.warn(`[products.ts] image not found in glob: ${jsonPath}`);
+  return jsonPath; // fallback to the literal path
+}
 
-  if (category === "running") {
-    const singlet = (images[`../../images/${gender}/${category}/sizechart_singlet.jpg`] as any)?.default;
-    const shirt = (images[`../../images/${gender}/${category}/sizechart_shirt.jpg`] as any)?.default;
-    sizeCharts = [singlet, shirt].filter(Boolean);
-  } else {
-    const sizeChart = (images[`../../images/${gender}/${category}/sizechart.jpg`] as any)?.default ?? "";
-    if (sizeChart) sizeCharts.push(sizeChart);
-  }
+// read sizes from JSON top-level if provided
+const sizesFromJson: string[] = (rawData as any).sizes ?? fallbackSizes;
 
-    products.push({
-    id: `${gender}-${category}-${series}-${colorway}`,
-    name: `${series} ${colorway}`.replace("_", " "),
-    gender,
-    category,
-    series,
-    colorway,
-    price,
-    images: imgs.sort(),
+// transform JSON products -> typed Product[] and resolve image links
+export const products: Product[] = ((rawData as any).products ?? []).map((p: any) => {
+  const images: string[] = (p.images ?? []).map((img: string) => resolveImagePath(img)).filter(Boolean);
+  const sizeCharts: string[] = (p.sizeCharts ?? []).map((sc: string) => resolveImagePath(sc)).filter(Boolean);
+console.log(images);
+  return {
+    id: p.id,
+    name: p.name,
+    gender: p.gender,
+    category: p.category,
+    series: p.series,
+    colorway: p.colorway,
+    price: p.price ?? 100,
+    discount: p.discount ?? 0,
+    images,
     sizeCharts,
-    sizes: ["2XS", "XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"], // ⬅️ default sizes
+    sizes: p.sizes ?? sizesFromJson,
+  } as Product;
 });
-}
-
-// --- Build your collection (based on structure you described)
-const genders = ["men", "women"] as const;
-const categories = ["running", "cycling", "padel"] as const;
-const seriesData = {
-  accelerated_series: ["velocity_green", "ignite_yellow"],
-  markv_series: ["heat_voltage", "power_blaze"],
-};
-genders.forEach((g) =>
-  categories.forEach((c) =>
-    Object.entries(seriesData).forEach(([series, colorways]) =>
-      colorways.forEach((colorway) => addProduct(g, c, series, colorway, 100)) // Pass default price
-    )
-  )
-);

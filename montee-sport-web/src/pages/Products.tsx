@@ -15,22 +15,53 @@ export default function Products() {
   );
 
   return (
-    <div className="grid grid-cols-3 gap-6 p-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 p-10">
       {filtered.map((p) => (
         <Link
           key={p.id}
           to={`/product/${p.id}`}
-          className="border rounded-lg p-4 shadow hover:shadow-lg transition"
+          className="group transition-transform duration-200 hover:scale-105"
         >
-          <img
-            src={p.images[0]}
-            alt={p.name}
-            className="w-full h-64 object-fill mb-2"
-          />
-          <h2 className="font-bold text-lg text-gray-700">{p.name}</h2>
-          <p className="text-gray-600 capitalize">
-            {p.gender} · {p.category}
-          </p>
+          {/* Product Image */}
+          <div className="flex justify-center">
+            <img
+              src={p.images[0]}
+              alt={p.name}
+              className="w-full h-full object-cover rounded-xl"
+            />
+          </div>
+
+          {/* Product Info */}
+        <div className="mt-4">
+            <h2 className="font-medium text-base text-gray-800">{p.name}</h2>
+            <p className="text-gray-500 text-sm capitalize mt-1">
+                {p.gender} · {p.category}
+            </p>
+
+            {/* Price Section */}
+            {p.discount ? (
+                <div className="mt-2 flex items-center justify-start gap-2">
+                <div className="flex items-center space-x-2">
+                    {/* Discounted Price */}
+                    <p className="text-black font-bold text-base">
+                    Rp{(p.price - (p.price * p.discount) / 100).toLocaleString("id-ID")}
+                    </p>
+
+                    {/* Original Price (crossed out) */}
+                    <p className="text-gray-400 line-through text-sm">Rp{p.price.toLocaleString("id-ID")}</p>
+                </div>
+
+                {/* Discount Percentage Badge */}
+                <span className="text-red-600 border border-red-600 text-xs font-medium px-2 py-0.5 rounded">
+                    -{p.discount}%
+                </span>
+                </div>
+            ) : (
+                // Normal price when no discount
+                <p className="text-black font-bold text-base mt-2">Rp{p.price.toLocaleString("id-ID")}</p>
+            )}
+            </div>
+
         </Link>
       ))}
     </div>

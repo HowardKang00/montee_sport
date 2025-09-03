@@ -13,13 +13,14 @@ export default function ProductDetail() {
 
   const [mainImg, setMainImg] = useState(product.images[0]);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleAddToCart = () => {
     if (!selectedSize) return alert("Please select a size first");
     addToCart({
-      id: Number(product.id.replace(/\D/g, "")) || Date.now(), // 👈 your ids look like strings, convert or fallback
+      id: Number(product.id.replace(/\D/g, "")) || Date.now(),
       name: product.name,
-      price: product.price ?? 100, // 👈 ensure your product has price in data
+      price: product.price ?? 100,
       qty: 1,
       img: mainImg,
       size: selectedSize,
@@ -56,7 +57,32 @@ export default function ProductDetail() {
         <p className="text-gray-600 capitalize mb-4">
           {product.gender} · {product.category}
         </p>
+          {/* Price Section */}
+          {product.discount ? (
+            <div className="mt-2 flex items-center justify-start gap-2 mb-6">
+              <div className="flex items-center space-x-2">
+                {/* Discounted Price */}
+                <p className="text-black font-bold text-2xl">
+                  Rp{(product.price - (product.price * product.discount) / 100).toLocaleString("id-ID")}
+                </p>
 
+                {/* Original Price (crossed out) */}
+                <p className="text-gray-400 line-through text-lg">
+                  Rp{product.price.toLocaleString("id-ID")}
+                </p>
+              </div>
+
+              {/* Discount Percentage Badge */}
+              <span className="text-red-600 border border-red-600 text-xs font-medium px-2 py-0.5 rounded">
+                -{product.discount}%
+              </span>
+            </div>
+          ) : (
+            // Normal price when no discount
+            <p className="text-black font-bold text-2xl mb-6">
+              Rp{product.price.toLocaleString("id-ID")}
+            </p>
+          )}
         <p className="text-sm text-gray-500 mb-2">
           Series: <span className="font-medium">{product.series}</span>
         </p>
@@ -67,8 +93,19 @@ export default function ProductDetail() {
         {/* Sizes */}
         {product.sizes?.length > 0 && (
           <>
-            <label className="block font-semibold mb-2 text-gray-700">Select Size</label>
-            <div className="flex gap-2 mb-6 text-gray-700">
+            <div className="flex justify-between items-center mb-2">
+              <label className="font-semibold text-gray-700">Select Size</label>
+              {product.sizeCharts.length > 0 && (
+                <button
+                  onClick={() => setIsDrawerOpen(true)}
+                  className="text-sm underline text-gray-600 hover:text-black"
+                >
+                  Size Chart
+                </button>
+              )}
+            </div>
+
+            <div className="flex gap-5 mb-6 text-gray-700">
               {product.sizes.map((size) => (
                 <button
                   key={size}
@@ -99,24 +136,53 @@ export default function ProductDetail() {
         </button>
       </div>
 
-      {/* BELOW: Size Charts */}
-      {product.sizeCharts.length > 0 && (
-        <div className="md:col-span-2 mt-12">
-          <h2 className="text-xl font-semibold mb-3 text-gray-700">
-            Size Chart{product.sizeCharts.length > 1 ? "s" : ""}
-          </h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            {product.sizeCharts.map((chart, i) => (
-              <img
-                key={i}
-                src={chart}
-                alt={`Size Chart ${i + 1}`}
-                className="max-h-[400px] object-contain border rounded"
-              />
-            ))}
+      {/* RIGHT DRAWER OVERLAY */}
+      {isDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          {/* Background overlay */}
+          <div
+            className="flex-1 bg-black/50"
+            onClick={() => setIsDrawerOpen(false)}
+          ></div>
+
+          {/* Drawer */}
+          <div className="w-[600px] max-w-full bg-white shadow-lg h-full p-6 overflow-y-auto animate-slide-in-right">
+            <div className="flex justify-between items-center mb-4">
+              <div></div>
+              <h2 className="text-xl font-semibold text-gray-700">Size Chart</h2>
+              <button
+                onClick={() => setIsDrawerOpen(false)}
+                className="text-gray-500 hover:text-black text-lg"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-4">
+              {product.sizeCharts.map((chart, i) => (
+                <img
+                  key={i}
+                  src={chart}
+                  alt={`Size Chart ${i + 1}`}
+                  className="w-full object-contain border rounded"
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}
+
+      {/* Animation */}
+      <style>
+        {`
+          @keyframes slide-in-right {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+          }
+          .animate-slide-in-right {
+            animation: slide-in-right 0.3s ease-out forwards;
+          }
+        `}
+      </style>
     </div>
   );
 }
