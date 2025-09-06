@@ -11,84 +11,72 @@ export default function ProductDetail() {
 
   if (!product) return <div className="p-8 text-red-500">Product not found</div>;
 
-  const [mainImg, setMainImg] = useState(product.images[0]);
+  const [mainImg, setMainImg] = useState(product.images[1]);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1); // <-- NEW
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleAddToCart = () => {
     if (!selectedSize) return alert("Please select a size first");
+    let productId = (`${product.id}-${selectedSize}`);
     addToCart({
-      id: Number(product.id.replace(/\D/g, "")) || Date.now(),
+      id: productId,
       name: product.name,
-      price: product.price ?? 100,
-      qty: 1,
+      price: product.discount
+        ? product.price - (product.price * product.discount) / 100
+        : product.price,
+      qty: quantity,
       img: mainImg,
       size: selectedSize,
+      gender: product.gender,
+      category: product.category
     });
+
+    // Reset quantity back to 1 after adding to cart
+    setQuantity(1);
   };
 
   return (
-    <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
+    <div className="p-8 grid grid-cols-1 md:grid-cols-5 gap-10">
       {/* LEFT: Main Image + Thumbnails */}
-      <div>
-        <img
-          src={mainImg}
-          alt={product.name}
-          className="w-full h-[500px] object-contain rounded-lg border shadow"
-        />
-        <div className="flex gap-3 mt-4 overflow-x-auto">
-          {product.images.map((img, i) => (
-            <img
-              key={i}
-              src={img}
-              alt={`${product.name} ${i}`}
-              onClick={() => setMainImg(img)}
-              className={`w-20 h-20 object-cover rounded cursor-pointer border ${
-                mainImg === img ? "border-black" : "border-gray-300"
-              }`}
-            />
-          ))}
-        </div>
+      <div className="md:col-span-3 grid md:grid-cols-3 lg:grid-cols-2 gap-1">
+        {product.images.slice(1).map((img, i) => (
+          <img
+            key={i}
+            src={img}
+            alt={`${product.name} ${i}`}
+            className="rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition"
+          />
+        ))}
       </div>
 
       {/* RIGHT: Details */}
-      <div>
+      <div className="md:col-span-2">
         <h1 className="text-3xl font-bold mb-2 text-gray-700">{product.name}</h1>
         <p className="text-gray-600 capitalize mb-4">
           {product.gender} · {product.category}
         </p>
-          {/* Price Section */}
-          {product.discount ? (
-            <div className="mt-2 flex items-center justify-start gap-2 mb-6">
-              <div className="flex items-center space-x-2">
-                {/* Discounted Price */}
-                <p className="text-black font-bold text-2xl">
-                  Rp{(product.price - (product.price * product.discount) / 100).toLocaleString("id-ID")}
-                </p>
 
-                {/* Original Price (crossed out) */}
-                <p className="text-gray-400 line-through text-lg">
-                  Rp{product.price.toLocaleString("id-ID")}
-                </p>
-              </div>
-
-              {/* Discount Percentage Badge */}
-              <span className="text-red-600 border border-red-600 text-xs font-medium px-2 py-0.5 rounded">
-                -{product.discount}%
-              </span>
+        {/* Price Section */}
+        {product.discount ? (
+          <div className="mt-2 flex items-center justify-start gap-2 mb-6">
+            <div className="flex items-center space-x-2">
+              <p className="text-black font-bold text-2xl">
+                Rp{(product.price - (product.price * product.discount) / 100).toLocaleString("id-ID")}
+              </p>
+              <p className="text-gray-400 line-through text-lg">
+                Rp{product.price.toLocaleString("id-ID")}
+              </p>
             </div>
-          ) : (
-            // Normal price when no discount
-            <p className="text-black font-bold text-2xl mb-6">
-              Rp{product.price.toLocaleString("id-ID")}
-            </p>
-          )}
-        <p className="text-sm text-gray-500 mb-2">
-          Series: <span className="font-medium">{product.series}</span>
-        </p>
-        <p className="text-sm text-gray-500 mb-6">
-          Colorway: <span className="font-medium">{product.colorway.replace("_", " ")}</span>
-        </p>
+            <span className="text-red-600 border border-red-600 text-xs font-medium px-2 py-0.5 rounded">
+              -{product.discount}%
+            </span>
+          </div>
+        ) : (
+          <p className="text-black font-bold text-2xl mb-6">
+            Rp{product.price.toLocaleString("id-ID")}
+          </p>
+        )}
 
         {/* Sizes */}
         {product.sizes?.length > 0 && (
@@ -105,12 +93,12 @@ export default function ProductDetail() {
               )}
             </div>
 
-            <div className="flex gap-5 mb-6 text-gray-700">
+            <div className="grid grid-cols-3 gap-4 mb-6 text-gray-700">
               {product.sizes.map((size) => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
-                  className={`px-4 py-2 border rounded ${
+                  className={`py-2 text-center border border-gray-300 rounded transition ${
                     selectedSize === size
                       ? "border-black bg-black text-white"
                       : "hover:border-black"
@@ -123,6 +111,27 @@ export default function ProductDetail() {
           </>
         )}
 
+        {/* Quantity Selector */}
+        <div className="flex items-center gap-4 mb-6">
+          <label className="font-semibold text-gray-700">Quantity</label>
+          <div className="flex items-center border rounded">
+            <button
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              className="px-3 py-1 text-lg font-bold text-gray-700 hover:bg-gray-100"
+            >
+              -
+            </button>
+            <span className="px-4 text-gray-700">{quantity}</span>
+            <button
+              onClick={() => setQuantity((q) => q + 1)}
+              className="px-3 py-1 text-lg font-bold text-gray-700 hover:bg-gray-100"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
           disabled={!selectedSize}
@@ -136,16 +145,14 @@ export default function ProductDetail() {
         </button>
       </div>
 
-      {/* RIGHT DRAWER OVERLAY */}
+      {/* Size Chart Drawer */}
       {isDrawerOpen && (
         <div className="fixed inset-0 z-50 flex">
-          {/* Background overlay */}
           <div
             className="flex-1 bg-black/50"
             onClick={() => setIsDrawerOpen(false)}
           ></div>
 
-          {/* Drawer */}
           <div className="w-[600px] max-w-full bg-white shadow-lg h-full p-6 overflow-y-auto animate-slide-in-right">
             <div className="flex justify-between items-center mb-4">
               <div></div>

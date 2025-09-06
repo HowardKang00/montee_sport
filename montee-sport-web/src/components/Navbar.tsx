@@ -9,7 +9,7 @@ export default function Navbar() {
   const { cart } = useCart();
   const [hovered, setHovered] = useState<string | null>(null);
 
-  const categories = ["All", "Running", "Cycling", "Padel"]; // Added "All"
+  const categories = ["Running", "Cycling", "Padel"];
 
   return (
     <motion.nav
@@ -28,7 +28,7 @@ export default function Navbar() {
       </Link>
 
       {/* Category Links */}
-      <ul className="flex space-x-8 font-sans relative">
+      <ul className="flex justify-center space-x-20 font-sans relative">
         {["Men", "Women"].map((gender) => (
           <motion.li
             key={gender}
@@ -45,7 +45,7 @@ export default function Navbar() {
             onMouseLeave={() => setHovered(null)}
           >
             <Link
-              to="/products"
+              to={`/products?gender=${gender.toLowerCase()}`}
               className="text-xl font-bold tracking-tight text-gray-700"
               style={{ display: "inline-block" }}
             >
@@ -92,9 +92,7 @@ export default function Navbar() {
                   >
                     <Link
                       to={
-                        cat === "All"
-                          ? `/products?gender=${gender.toLowerCase()}`
-                          : `/products?gender=${gender.toLowerCase()}&category=${cat.toLowerCase()}`
+                        `/products?gender=${gender.toLowerCase()}&category=${cat.toLowerCase()}`
                       }
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black hover:underline transition font-medium"
                     >

@@ -2,20 +2,22 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
 type CartItem = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   qty: number;
   img: string;
   size: string;
+  gender: string;
+  category: string;
 };
 
 type CartContextType = {
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (id: number) => void;
-  updateQty: (id: number, qty: number) => void;
-  updateImg: (id: number, img: string) => void;
+  removeFromCart: (id: string) => void;
+  updateQty: (id: string, qty: number) => void;
+  updateImg: (id: string, img: string) => void;
   clearCart: () => void;
   orderExternalId: string | null;
   checkoutCart: () => Promise<string | null>;
@@ -29,6 +31,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [orderExternalId, setOrderExternalId] = useState<string | null>(null);
 
   const addToCart = (item: CartItem) => {
+    console.log(item.id);
     setCart((prev) => {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {
@@ -40,17 +43,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = (id: string) => {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const updateQty = (id: number, qty: number) => {
+  const updateQty = (id: string, qty: number) => {
     setCart((prev) =>
       prev.map((item) => (item.id === id ? { ...item, qty } : item))
     );
   };
 
-  const updateImg = (id: number, img: string) => {
+  const updateImg = (id: string, img: string) => {
     setCart((prev) =>
       prev.map((item) => (item.id === id ? { ...item, img } : item))
     );

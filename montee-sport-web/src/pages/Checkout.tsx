@@ -29,7 +29,7 @@ export default function Checkout() {
         Checkout
       </motion.h1>
 
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 text-gray-700">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-6 text-gray-700">
         {cart.length === 0 ? (
           <motion.p
             className="text-gray-500 text-center"
@@ -49,31 +49,40 @@ export default function Checkout() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <div>
-                    <p className="font-medium">{item.name}</p>
-                    <div className="flex gap-2 mt-1 items-center">
-                      <button
-                        onClick={() => updateQty(item.id, Math.max(1, item.qty - 1))}
-                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 transition text-gray-700"
-                      >
-                        -
-                      </button>
-                      <span>{item.qty}</span>
-                      <button
-                        onClick={() => updateQty(item.id, item.qty + 1)}
-                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 transition text-gray-700"
-                      >
-                        +
-                      </button>
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="ml-2 text-red-500 hover:text-red-700 transition text-gray-700"
-                      >
-                        Remove
-                      </button>
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={item.img}
+                      alt={item.name}
+                      className="w-24 h-24 object-contain"
+                    />
+                    <div>
+                      <p className="font-medium text-black">{item.name}</p>
+                      <p className="font-medium capitalize text-gray-500">{item.gender} {item.size} · {item.category}</p>
+                    
+                      <div className="flex gap-2 mt-1 items-center">
+                        <button
+                          onClick={() => updateQty(item.id, Math.max(1, item.qty - 1))}
+                          className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 transition text-gray-700"
+                        >
+                          -
+                        </button>
+                        <span>{item.qty}</span>
+                        <button
+                          onClick={() => updateQty(item.id, item.qty + 1)}
+                          className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 transition text-gray-700"
+                        >
+                          +
+                        </button>
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="ml-2 text-red-500 hover:text-red-700 transition text-gray-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <span className="font-medium">${item.price * item.qty}</span>
+                  <span className="font-medium">Rp{(item.price * item.qty).toLocaleString("id-ID")}</span>
                 </motion.li>
               ))}
             </ul>
@@ -84,7 +93,7 @@ export default function Checkout() {
               transition={{ duration: 0.3 }}
             >
               <span>Total</span>
-              <span>${total}</span>
+              <span>Rp{total.toLocaleString("id-ID")}</span>
             </motion.div>
 
             <motion.button
