@@ -1,12 +1,13 @@
-// web/src/components/Navbar.tsx
 import { Link } from "react-router-dom";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, User } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
 export default function Navbar() {
   const { cart } = useCart();
+  const { user, logout } = useAuth();
   const [hovered, setHovered] = useState<string | null>(null);
 
   const categories = ["Running", "Cycling", "Padel"];
@@ -106,15 +107,70 @@ export default function Navbar() {
         ))}
       </ul>
 
-      {/* Cart */}
-      <Link to="/checkout" className="relative">
-        <ShoppingCart className="w-6 h-6 text-gray-700" />
-        {cart.length > 0 && (
-          <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-            {cart.length}
-          </span>
+      {/* User Menu & Cart */}
+      <div className="flex items-center space-x-6">
+        {user ? (
+          <div className="relative" onMouseEnter={() => setHovered('user')} onMouseLeave={() => setHovered(null)}>
+            <button className="flex items-center space-x-2">
+              <User className="w-6 h-6 text-gray-700" />
+              <span className="text-gray-700">{user.firstName}</span>
+            </button>
+            
+            {hovered === 'user' && (
+              <motion.div
+                className="absolute right-0 mt-3 w-48 bg-white shadow-lg rounded-xl border border-gray-200 py-3 z-50"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.1 }}
+              >
+                <Link
+                  to="/profile"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
+                >
+                  Profile
+                </Link>
+                <Link
+                  to="/orders"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
+                >
+                  Orders
+                </Link>
+                <button
+                  onClick={logout}
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
+                >
+                  Logout
+                </button>
+              </motion.div>
+            )}
+          </div>
+        ) : (
+          <div className="space-x-4">
+            <Link
+              to="/login"
+              className="text-gray-700 hover:text-gray-900 transition"
+            >
+              Login
+            </Link>
+            <Link
+              to="/register"
+              className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition"
+            >
+              Register
+            </Link>
+          </div>
         )}
-      </Link>
+
+        <Link to="/cart" className="relative">
+          <ShoppingCart className="w-6 h-6 text-gray-700" />
+          {cart.length > 0 && (
+            <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+              {cart.length}
+            </span>
+          )}
+        </Link>
+      </div>
     </motion.nav>
   );
 }

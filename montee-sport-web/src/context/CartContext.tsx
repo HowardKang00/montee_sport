@@ -5,21 +5,22 @@ type CartItem = {
   id: string;
   name: string;
   price: number;
-  qty: number;
+  quantity: number;
   img: string;
   size: string;
   gender: string;
   category: string;
+  productId: string;
 };
 
 type CartContextType = {
   cart: CartItem[];
-  addToCart: (item: CartItem) => void;
+  addToCart: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
   removeFromCart: (id: string) => void;
-  updateQty: (id: string, qty: number) => void;
+  updateQty: (id: string, quantity: number) => void;
   updateImg: (id: string, img: string) => void;
   clearCart: () => void;
-  orderExternalId: string | null;
+  orderExternalId?: string; // Add this line
   checkoutCart: () => Promise<string | null>;
   checkOrderStatus: () => Promise<"PENDING" | "PAID" | "EXPIRED" | null>;
 };
@@ -30,16 +31,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orderExternalId, setOrderExternalId] = useState<string | null>(null);
 
-  const addToCart = (item: CartItem) => {
-    console.log(item.id);
+  const addToCart = (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
     setCart((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
+      const existing = prev.find((i) => i.id === item.id && i.size === item.size);
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id && i.size === item.size ? { ...i, qty: i.qty + item.qty } : i
+          i.id === item.id && i.size === item.size
+            ? { ...i, quantity: i.quantity + (item.quantity || 1) }
+            : i
         );
       }
-      return [...prev, item];
+      return [...prev, { ...item, quantity: item.quantity || 1 } as CartItem];
     });
   };
 
@@ -47,9 +49,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const updateQty = (id: string, qty: number) => {
+  const updateQty = (id: string, quantity: number) => {
     setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, qty } : item))
+      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
     );
   };
 
@@ -66,7 +68,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart }),
+        credentials: 'include',
+        body: JSON.stringify({ items: cart }),
       });
 
       if (!response.ok) throw new Error("Checkout failed");
@@ -87,7 +90,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     if (!orderExternalId) return null;
 
     try {
-      const response = await fetch(`/api/order-status/${orderExternalId}`);
+      const response = await fetch(`/api/order-status/${orderExternalId}`, {
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error("Failed to fetch order status");
 
       const data = await response.json();
@@ -108,7 +113,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         updateImg,
         clearCart,
         checkoutCart,
-        orderExternalId,
         checkOrderStatus,
       }}
     >

@@ -1,17 +1,44 @@
 // server/routes/orderStatus.ts
 import express from "express";
 import fetch from "node-fetch";
-import { prisma } from "../../prisma/lib/prisma";
-import type { XenditInvoice } from "../types/xendit"; // ✅ import shared type
+import { PrismaClient } from "../../src/generated/prisma";
+import type { XenditInvoice } from "../types/xendit";
+import { auth, type AuthRequest } from "../middleware/auth";
 
 const router = express.Router();
+const prisma = new PrismaClient();
 
-router.get("/order-status/:externalId", async (req, res) => {
-  const { externalId } = req.params;
+router.get("/:orderId", auth, async (req: AuthRequest, res) => {
+  const { orderId } = req.params;
+  const userId = req.user?.userId;
+
+  if (!userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
   try {
+    // First, get the order and verify it belongs to the user
+    const order = await prisma.order.findFirst({
+      where: {
+        id: parseInt(orderId),
+        userId
+      },
+      include: {
+        orderItems: {
+          include: {
+            product: true
+          }
+        }
+      }
+    });
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Then check Xendit status
     const response = await fetch(
-      `https://api.xendit.co/v2/invoices?external_id=${externalId}`,
+      `https://api.xendit.co/v2/invoices?external_id=${order.externalId}`,
       {
         headers: {
           Authorization:
@@ -25,28 +52,35 @@ router.get("/order-status/:externalId", async (req, res) => {
 
     if (!response.ok) {
       console.error("Xendit error:", data);
-      return res.status(400).json({ error: "Xendit API failed" });
+      return res.status(400).json({ error: "Payment status check failed" });
     }
 
     if (!Array.isArray(data) || data.length === 0) {
-      return res.status(404).json({ error: "No invoice found" });
+      return res.json({ 
+        order,
+        payment: { status: order.status }
+      });
     }
 
     const invoice: XenditInvoice = data[0];
 
-    const updatedOrder = await prisma.order.update({
-      where: { externalId },
-      data: {
-        status: invoice.status,
-        paidAt: invoice.paid_at ? new Date(invoice.paid_at) : null,
-      },
-    });
+    // Update order status if it has changed
+    if (invoice.status !== order.status) {
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { status: invoice.status }
+      });
+      order.status = invoice.status;
+    }
 
     return res.json({
-      status: invoice.status,
-      paidAt: invoice.paid_at || null,
-      expiryDate: invoice.expiry_date,
-      dbOrder: updatedOrder,
+      order,
+      payment: {
+        status: invoice.status,
+        paidAt: invoice.paid_at || null,
+        expiryDate: invoice.expiry_date,
+        invoiceUrl: invoice.invoice_url
+      }
     });
   } catch (err) {
     console.error(err);

@@ -7,7 +7,7 @@ type OrderStatusType = "pending" | "PAID" | "EXPIRED";
 
 export default function OrderStatus() {
   const { orderExternalId, clearCart } = useCart();
-  const status = useOrderStatus(orderExternalId) as OrderStatusType;
+  const status = useOrderStatus(orderExternalId ?? null) as OrderStatusType;
 
   // Automatically clear cart if payment succeeded
   if (status === "PAID") {

@@ -50,7 +50,6 @@ const sizesFromJson: string[] = (rawData as any).sizes ?? fallbackSizes;
 export const products: Product[] = ((rawData as any).products ?? []).map((p: any) => {
   const images: string[] = (p.images ?? []).map((img: string) => resolveImagePath(img)).filter(Boolean);
   const sizeCharts: string[] = (p.sizeCharts ?? []).map((sc: string) => resolveImagePath(sc)).filter(Boolean);
-console.log(images);
   return {
     id: p.id,
     name: p.name,

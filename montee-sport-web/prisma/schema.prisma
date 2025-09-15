@@ -1,17 +1,8 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-model Order {
-  id              int      @id @default(autoincrement()) // internal UUID
-  externalId      String   @unique              // used with Xendit (external reference)
-  amount          Int
-  status          String   @default("pending")  // pending | PAID | EXPIRED
-  payerEmail      String
-  description     String?
-  invoiceUrl      String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
@@ -19,7 +10,96 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  password      String
+  firstName     String
+  lastName      String
+  phoneNumber   String?
+  address       Address[]
+  orders        Order[]
+  role          Role      @default(CUSTOMER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("user")
+}
+
+model Address {
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  street      String
+  city        String
+  state       String
+  postalCode  String
+  country     String
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("address")
+  @@index([userId])
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+model Product {
+  id                Int         @id @default(autoincrement())
+  productid         String      @unique
+  name              String
+  description       String
+  series            String
+  colorway          String
+  price             Decimal     @db.Decimal(9,2) 
+  discount          Decimal     @db.Decimal(9,2) 
+  gender            String
+  category          String
+  images            String
+  sizecharts        String[]
+  sizes             String[]
+  createdat         DateTime    @default(now()) @db.Timestamp
+  orderItems        OrderItem[]
+
+  @@map("product")
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  externalId  String      @unique
+  user        User        @relation(fields: [userId], references: [id])
+  userId      Int
+  amount      Decimal     @db.Decimal(9,2)
+  status      String      // PENDING, PAID, FAILED, etc.
+  shippingAddress String  // Stored as JSON string of address at time of purchase
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+
+  @@map("order")
+  @@index([userId])
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   Int
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int
+  size      String
+  price     Decimal  @db.Decimal(9,2)    // Price at time of purchase
+  createdAt DateTime @default(now())
+
+  @@map("order_item")
+  @@index([orderId])
+  @@index([productId])
+}

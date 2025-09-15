@@ -21,11 +21,12 @@ export default function ProductDetail() {
     let productId = (`${product.id}-${selectedSize}`);
     addToCart({
       id: productId,
+      productId: product.id,
       name: product.name,
       price: product.discount
         ? product.price - (product.price * product.discount) / 100
         : product.price,
-      qty: quantity,
+      quantity: quantity,
       img: mainImg,
       size: selectedSize,
       gender: product.gender,
