@@ -4,11 +4,26 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useEffect } from "react";
 
 export default function Navbar() {
   const { cart } = useCart();
   const { user, logout } = useAuth();
   const [hovered, setHovered] = useState<string | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    if (!profileOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.profile-menu-parent')) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [profileOpen]);
 
   const categories = ["Running", "Cycling", "Padel"];
 
@@ -110,13 +125,17 @@ export default function Navbar() {
       {/* User Menu & Cart */}
       <div className="flex items-center space-x-6">
         {user ? (
-          <div className="relative" onMouseEnter={() => setHovered('user')} onMouseLeave={() => setHovered(null)}>
-            <button className="flex items-center space-x-2">
+          <div className="relative profile-menu-parent" style={{ display: 'inline-block' }}>
+            <button
+              className="flex items-center space-x-2"
+              onClick={() => setProfileOpen((open) => !open)}
+              aria-haspopup="true"
+              aria-expanded={profileOpen}
+            >
               <User className="w-6 h-6 text-gray-700" />
               <span className="text-gray-700">{user.firstName}</span>
             </button>
-            
-            {hovered === 'user' && (
+            {profileOpen && (
               <motion.div
                 className="absolute right-0 mt-3 w-48 bg-white shadow-lg rounded-xl border border-gray-200 py-3 z-50"
                 initial={{ opacity: 0, y: -10 }}
@@ -127,17 +146,19 @@ export default function Navbar() {
                 <Link
                   to="/profile"
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
+                  onClick={() => setProfileOpen(false)}
                 >
                   Profile
                 </Link>
                 <Link
                   to="/orders"
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
+                  onClick={() => setProfileOpen(false)}
                 >
                   Orders
                 </Link>
                 <button
-                  onClick={logout}
+                  onClick={() => { setProfileOpen(false); logout(); }}
                   className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
                 >
                   Logout

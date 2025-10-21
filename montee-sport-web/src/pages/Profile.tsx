@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, token, setUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
@@ -20,7 +20,7 @@ export default function Profile() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(formData)
       });
@@ -30,6 +30,7 @@ export default function Profile() {
       }
 
       const data = await response.json();
+      setUser(data); // <-- update context
       setMessage({ type: 'success', content: 'Profile updated successfully!' });
       setIsEditing(false);
     } catch (error) {
@@ -51,7 +52,7 @@ export default function Profile() {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">Profile</h1>
+      <h1 className="text-3xl font-bold mb-8 text-gray-700">Profile</h1>
 
       {message.content && (
         <div className={`p-4 rounded-md mb-4 ${

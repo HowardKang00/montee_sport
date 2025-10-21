@@ -152,7 +152,25 @@ export default function Register() {
               Register
             </button>
           </div>
+          <div className="mt-4">
+            <a href="http://localhost:4000/api/auth/google" className="w-full flex justify-center">
+              <button
+                type="button"
+                className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <img src="https://www.gstatic.com/marketing-cms/assets/images/d5/dc/cfe9ce8b4425b410b49b7f2dd3f3/g.webp=s48-fcrop64=1,00000000ffffffff-rw" alt="Google" className="h-5 w-5 mr-2" />
+                Register with Google
+              </button>
+            </a>
+          </div>
         </form>
+        {/* Login link */}
+        <div className="mt-6 text-center text-sm text-gray-600">
+          Already have an account?{' '}
+          <a href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            Login here
+          </a>
+        </div>
       </div>
     </div>
   );

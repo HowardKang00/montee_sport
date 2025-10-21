@@ -2,6 +2,7 @@ import express from 'express';
 import { PrismaClient } from '../../src/generated/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import auth from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -107,7 +108,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Get user profile
-router.get('/profile', async (req, res) => {
+router.get('/profile', auth, async (req, res) => {
   try {
     // Get user ID from JWT token
     const userId = (req as any).user?.userId;
@@ -137,7 +138,7 @@ router.get('/profile', async (req, res) => {
 });
 
 // Get user orders
-router.get('/orders', async (req, res) => {
+router.get('/orders', auth, async (req, res) => {
   try {
     const userId = (req as any).user?.userId;
     if (!userId) {
@@ -172,7 +173,7 @@ router.get('/orders', async (req, res) => {
 });
 
 // Update user profile
-router.put('/profile', async (req, res) => {
+router.put('/profile', auth, async (req, res) => {
   try {
     const userId = (req as any).user?.userId;
     if (!userId) {
@@ -204,7 +205,7 @@ router.put('/profile', async (req, res) => {
 });
 
 // Add new address
-router.post('/address', async (req, res) => {
+router.post('/address', auth, async (req, res) => {
   try {
     const userId = (req as any).user?.userId;
     if (!userId) {

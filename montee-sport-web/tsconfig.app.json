@@ -23,5 +23,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "server/routes", "scripts/generateProductsJson.ts"]
+  "include": ["src", "server/routes", "scripts/generateProductsJson.ts", "server/middleware/auth.ts", "server/middleware/auth.d.ts"]
 }

@@ -3,7 +3,7 @@ import express from "express";
 import fetch from "node-fetch";
 import { PrismaClient } from "../../src/generated/prisma";
 import type { XenditInvoice } from "../types/xendit";
-import { auth, type AuthRequest } from "../middleware/auth";
+import { auth } from "../middleware/auth";
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -21,7 +21,7 @@ interface Product {
   discount: number | string;
 }
 
-router.post("/checkout", auth, async (req: AuthRequest, res) => {
+router.post("/checkout", auth, async (req, res) => {
   if (!process.env.XENDIT_SECRET_KEY || !process.env.FRONTEND_URL) {
     console.error('Missing required environment variables');
     return res.status(500).json({ error: 'Server configuration error' });
@@ -48,7 +48,7 @@ router.post("/checkout", auth, async (req: AuthRequest, res) => {
     return res.status(400).json({ error: 'Invalid shipping address' });
   }
 
-  const userId = req.user?.userId;
+  const userId = (req.user && 'userId' in req.user) ? (req.user as { userId: number }).userId : undefined;
 
   if (!userId) {
     return res.status(401).json({ error: 'User not authenticated' });

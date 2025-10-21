@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import Checkout from "./pages/Checkout";
@@ -28,6 +29,20 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function AppRoutes() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { setToken, fetchUser } = useAuth();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+    if (token) {
+      setToken(token);
+      fetchUser(token);
+      navigate("/", { replace: true });
+    }
+  }, [location, setToken, fetchUser, navigate]);
+
   return (
     <div className="font-sans bg-gray-50 min-h-screen">
       <Navbar />

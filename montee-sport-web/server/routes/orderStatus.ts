@@ -3,14 +3,15 @@ import express from "express";
 import fetch from "node-fetch";
 import { PrismaClient } from "../../src/generated/prisma";
 import type { XenditInvoice } from "../types/xendit";
-import { auth, type AuthRequest } from "../middleware/auth";
+import { auth } from "../middleware/auth";
 
 const router = express.Router();
 const prisma = new PrismaClient();
+// const auth = require('../middleware/auth');
 
-router.get("/:orderId", auth, async (req: AuthRequest, res) => {
+router.get("/:orderId", auth, async (req, res) => {
   const { orderId } = req.params;
-  const userId = req.user?.userId;
+  const userId = (req.user && 'userId' in req.user) ? (req.user as { userId: number }).userId : undefined;
 
   if (!userId) {
     return res.status(401).json({ error: 'Unauthorized' });
