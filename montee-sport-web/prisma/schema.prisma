@@ -63,9 +63,11 @@ model Product {
   discount          Decimal     @db.Decimal(9,2) 
   gender            String
   category          String
-  images            String
+  images            String[]
   sizecharts        String[]
   sizes             String[]
+  stock             Int         @default(0)
+  archived          Boolean     @default(false)
   createdat         DateTime    @default(now()) @db.Timestamp
   orderItems        OrderItem[]
 

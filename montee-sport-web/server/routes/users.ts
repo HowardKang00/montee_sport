@@ -46,7 +46,7 @@ router.post('/register', async (req, res) => {
 
     // Create JWT token
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET as string,
       { expiresIn: '24h' }
     );
@@ -89,7 +89,7 @@ router.post('/login', async (req, res) => {
 
     // Create JWT token
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET as string,
       { expiresIn: '24h' }
     );
@@ -127,10 +127,9 @@ router.get('/profile', auth, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Remove password from response
+    // Remove password from response and ensure role is included
     const { password: _, ...userWithoutPassword } = user;
-
-    res.json(userWithoutPassword);
+    res.json({ ...userWithoutPassword, role: user.role });
   } catch (error) {
     console.error('Profile fetch error:', error);
     res.status(500).json({ error: 'Failed to fetch profile' });
@@ -223,6 +222,58 @@ router.post('/address', auth, async (req, res) => {
   } catch (error) {
     console.error('Address creation error:', error);
     res.status(500).json({ error: 'Failed to create address' });
+  }
+});
+
+// Update address for logged-in user
+router.put('/address/:id', auth, async (req, res) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const addressId = Number(req.params.id);
+    if (!userId || !addressId) {
+      return res.status(400).json({ error: 'Invalid user or address ID' });
+    }
+
+    // Find address and check ownership
+    const address = await prisma.address.findUnique({
+      where: { id: addressId },
+    });
+    if (!address || address.userId !== userId) {
+      return res.status(404).json({ error: 'Address not found' });
+    }
+
+    // If setting as default, unset previous default
+    if (req.body.isDefault) {
+      await prisma.address.updateMany({
+        where: { userId },
+        data: { isDefault: false }
+      });
+    }
+
+    // Update address fields
+    await prisma.address.update({
+      where: { id: addressId },
+      data: {
+        street: req.body.street,
+        city: req.body.city,
+        state: req.body.state,
+        postalCode: req.body.postalCode,
+        country: req.body.country,
+        isDefault: !!req.body.isDefault
+      }
+    });
+
+    // Return updated user with addresses
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { address: true }
+    });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const { password: _, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
+  } catch (error) {
+    console.error('Address update error:', error);
+    res.status(500).json({ error: 'Failed to update address' });
   }
 });
 

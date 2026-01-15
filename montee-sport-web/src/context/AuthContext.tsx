@@ -7,6 +7,7 @@ interface User {
   lastName: string;
   phoneNumber?: string;
   address: Address[];
+  role: string;
 }
 
 interface Address {

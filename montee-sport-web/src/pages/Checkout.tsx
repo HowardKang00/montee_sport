@@ -1,7 +1,7 @@
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface ShippingAddress {
@@ -28,6 +28,15 @@ export default function Checkout() {
     postalCode: '',
     country: ''
   });
+  // Biteship integration state
+  const [couriers, setCouriers] = useState<any[]>([]);
+  const [selectedCourier, setSelectedCourier] = useState<string | null>(null);
+  const [shippingCost, setShippingCost] = useState<number>(0);
+  // Biteship address autocomplete
+  const [addressQuery, setAddressQuery] = useState('');
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -37,7 +46,129 @@ export default function Checkout() {
       ...prev,
       [name]: value
     }));
+    if (name === 'street') {
+      setAddressQuery(value);
+      setShowSuggestions(true);
+    }
   };
+
+  // Fetch Biteship address suggestions
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!addressQuery || addressQuery.length < 3) {
+        setAddressSuggestions([]);
+        return;
+      }
+      try {
+        const res = await fetch(`https://api.biteship.com/v1/maps/autocomplete?input=${encodeURIComponent(addressQuery)}`, {
+          headers: {
+            'Authorization': `Bearer ${process.env.REACT_APP_BITESHIP_API_KEY || ''}`
+          }
+        });
+        if (!res.ok) return setAddressSuggestions([]);
+        const data = await res.json();
+        setAddressSuggestions(data.results || []);
+      } catch {
+        setAddressSuggestions([]);
+      }
+    };
+    if (showSuggestions) fetchSuggestions();
+  }, [addressQuery, showSuggestions]);
+
+  // Autofill address fields when suggestion is selected
+  const handleSuggestionSelect = async (suggestion: any) => {
+    setShowSuggestions(false);
+    setAddressQuery(suggestion.text);
+    // Get details from Biteship place_id
+    try {
+      const res = await fetch(`https://api.biteship.com/v1/maps/details?place_id=${encodeURIComponent(suggestion.place_id)}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.REACT_APP_BITESHIP_API_KEY || ''}`
+        }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const comp = data.result;
+      setNewAddress(prev => ({
+        ...prev,
+        street: comp.street_name || suggestion.text,
+        city: comp.city_name || '',
+        state: comp.administrative_area_level_1 || '',
+        postalCode: comp.postal_code || '',
+        country: comp.country || ''
+      }));
+    } catch {}
+  };
+
+  // Hide suggestions on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    if (showSuggestions) document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showSuggestions]);
+
+  // Fetch Biteship couriers/rates when address changes and is filled
+  useEffect(() => {
+    const fetchCouriers = async () => {
+      let address: ShippingAddress;
+      if (selectedAddress === 'new') {
+        address = newAddress;
+      } else {
+        const addr = user?.address?.find(addr => addr.id === selectedAddress);
+        if (!addr) return;
+        address = {
+          street: addr.street,
+          city: addr.city,
+          state: addr.state,
+          postalCode: addr.postalCode,
+          country: addr.country
+        };
+      }
+      // Only fetch if address is fully filled
+      if (!address.street || !address.city || !address.state || !address.postalCode || !address.country) {
+        setCouriers([]);
+        return;
+      }
+      setCouriers([]);
+      setSelectedCourier(null);
+      setShippingCost(0);
+      try {
+        // Call backend with cart and address, get couriers
+        const cartItems = cart.map(item => ({
+          productId: item.id,
+          quantity: item.quantity,
+          size: item.size,
+          price: item.price
+        }));
+        const response = await fetch('http://localhost:4000/api/cart/checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            cart: cartItems,
+            shippingAddress: address
+          })
+        });
+        const data = await response.json();
+        if (response.ok && data.biteshipCouriers && Array.isArray(data.biteshipCouriers) && data.biteshipCouriers.length > 0) {
+          setCouriers(data.biteshipCouriers);
+        } else {
+          setCouriers([]);
+        }
+      } catch (err) {
+        setCouriers([]);
+      }
+    };
+    // Only fetch if cart is not empty
+    if (cart.length > 0) fetchCouriers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAddress, newAddress, cart, user]);
 
   const getShippingAddress = (): ShippingAddress => {
     if (selectedAddress === 'new') {
@@ -57,6 +188,10 @@ export default function Checkout() {
   const handleCheckout = async () => {
     try {
       if (cart.length === 0) return;
+      if (!selectedCourier) {
+        setError('Please select a courier');
+        return;
+      }
       setLoading(true);
       setError(null);
 
@@ -79,7 +214,8 @@ export default function Checkout() {
         },
         body: JSON.stringify({
           cart: cartItems,
-          shippingAddress
+          shippingAddress,
+          courierCode: selectedCourier
         })
       });
 
@@ -238,16 +374,31 @@ export default function Checkout() {
 
                 {selectedAddress === 'new' && (
                   <div className="space-y-4">
-                    <div>
+                    <div className="relative">
                       <label className="block text-sm font-medium text-gray-700">Street Address</label>
                       <input
                         type="text"
                         name="street"
                         value={newAddress.street}
                         onChange={handleNewAddressChange}
+                        onFocus={() => setShowSuggestions(true)}
+                        autoComplete="off"
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-white"
                       />
+                      {showSuggestions && addressSuggestions.length > 0 && (
+                        <div ref={suggestionsRef} className="absolute z-10 bg-white border border-gray-200 w-full mt-1 rounded shadow-lg max-h-56 overflow-y-auto">
+                          {addressSuggestions.map((s, i) => (
+                            <div
+                              key={s.place_id || i}
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                              onClick={() => handleSuggestionSelect(s)}
+                            >
+                              {s.text}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -259,7 +410,7 @@ export default function Checkout() {
                           value={newAddress.city}
                           onChange={handleNewAddressChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-white"
                         />
                       </div>
                       <div>
@@ -270,7 +421,7 @@ export default function Checkout() {
                           value={newAddress.state}
                           onChange={handleNewAddressChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-white"
                         />
                       </div>
                     </div>
@@ -284,7 +435,7 @@ export default function Checkout() {
                           value={newAddress.postalCode}
                           onChange={handleNewAddressChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-white"
                         />
                       </div>
                       <div>
@@ -295,7 +446,7 @@ export default function Checkout() {
                           value={newAddress.country}
                           onChange={handleNewAddressChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-white"
                         />
                       </div>
                     </div>
@@ -303,10 +454,45 @@ export default function Checkout() {
                 )}
               </div>
 
-              {/* Order Summary */}
+              {/* Courier selection and Order Summary */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-                
+
+                {/* Courier selection */}
+                {couriers.length > 0 ? (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-700 mb-2">Select Courier</h3>
+                    <div className="space-y-2">
+                      {couriers.map((courier) => (
+                        courier.courier_services.map((service: any) => (
+                          <label key={service.courier_code} className="flex items-center space-x-3">
+                            <input
+                              type="radio"
+                              name="courier"
+                              value={service.courier_code}
+                              checked={selectedCourier === service.courier_code}
+                              onChange={() => {
+                                setSelectedCourier(service.courier_code);
+                                setShippingCost(service.price);
+                              }}
+                              className="mt-1"
+                            />
+                            <div className="text-sm">
+                              <span className="font-medium text-gray-700">{service.courier_name} ({service.courier_service_name})</span>
+                              <span className="ml-2 text-gray-500">Rp{service.price.toLocaleString("id-ID")}</span>
+                              {service.etd && (
+                                <span className="ml-2 text-xs text-gray-400">Est. {service.etd} days</span>
+                              )}
+                            </div>
+                          </label>
+                        ))
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-4 text-sm text-gray-500">{(selectedAddress === 'new' ? Object.values(newAddress).every(Boolean) : !!selectedAddress) ? 'No couriers available for this address.' : 'Fill in address to see couriers.'}</div>
+                )}
+
                 {error && (
                   <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-md">
                     {error}
@@ -320,19 +506,19 @@ export default function Checkout() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Shipping</span>
-                    <span>Free</span>
+                    <span>{selectedCourier ? `Rp${shippingCost.toLocaleString("id-ID")}` : '-'}</span>
                   </div>
                   <div className="border-t pt-2 mt-2">
                     <div className="flex justify-between text-lg font-semibold">
                       <span>Total</span>
-                      <span>Rp{total.toLocaleString("id-ID")}</span>
+                      <span>Rp{(total + (selectedCourier ? shippingCost : 0)).toLocaleString("id-ID")}</span>
                     </div>
                   </div>
                 </div>
 
                 <button
                   onClick={handleCheckout}
-                  disabled={loading || cart.length === 0}
+                  disabled={loading || cart.length === 0 || !selectedCourier}
                   className="w-full mt-6 bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Processing...' : 'Proceed to Payment'}

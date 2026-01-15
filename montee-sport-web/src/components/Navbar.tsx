@@ -67,8 +67,6 @@ export default function Navbar() {
             >
               {gender}
             </Link>
-
-            {/* Underline animation */}
             <motion.span
               variants={{
                 initial: { scaleX: 0, opacity: 0 },
@@ -88,8 +86,6 @@ export default function Navbar() {
                 transform: "scaleX(0)",
               }}
             />
-
-            {/* Dropdown Panel */}
             {hovered === gender && (
               <motion.div
                 className="absolute left-0 mt-3 w-40 bg-white shadow-lg rounded-xl border border-gray-200 py-3 z-50"
@@ -99,27 +95,29 @@ export default function Navbar() {
                 transition={{ duration: 0.1 }}
               >
                 {categories.map((cat) => (
-                  <motion.div
-                    key={cat}
-                    className="relative"
-                    whileHover="hover"
-                    initial="initial"
-                    animate="initial"
-                  >
+                  <div key={cat} className="relative">
                     <Link
-                      to={
-                        `/products?gender=${gender.toLowerCase()}&category=${cat.toLowerCase()}`
-                      }
+                      to={`/products?gender=${gender.toLowerCase()}&category=${cat.toLowerCase()}`}
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black hover:underline transition font-medium"
                     >
                       {cat}
                     </Link>
-                  </motion.div>
+                  </div>
                 ))}
               </motion.div>
             )}
           </motion.li>
         ))}
+        {user && user.role === "ADMIN" && (
+          <li>
+            <Link
+              to="/admin"
+              className="text-xl font-bold tracking-tight text-red-600 hover:text-red-800"
+            >
+              Admin
+            </Link>
+          </li>
+        )}
       </ul>
 
       {/* User Menu & Cart */}

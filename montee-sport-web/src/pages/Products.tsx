@@ -1,8 +1,9 @@
-import { products } from "../data/products";
+import { fetchProducts } from "../data/products";
+import type { Product } from "../data/products";
 import { Link, useLocation, useParams } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
-export default function Products() {
+const Products = () => {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const series = query.get("series");
@@ -12,13 +13,28 @@ export default function Products() {
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    fetchProducts()
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError("Failed to load products");
+        setLoading(false);
+      });
+  }, []);
 
   const filtered = products.filter(
     (p) =>
       (!gender || p.gender === gender) &&
       (!category || p.category === category)
   );
-  
+
   // Get unique products by filtering duplicates across genders
   const uniqueProducts = useMemo(() => {
     const seen = new Set();
@@ -28,12 +44,20 @@ export default function Products() {
       seen.add(key);
       return true;
     });
-  }, []);
+  }, [products]);
 
   const filteredProducts = useMemo(() => {
     if (selectedCategory === "all") return uniqueProducts;
     return uniqueProducts.filter(product => product.category.toLowerCase() === selectedCategory);
   }, [uniqueProducts, selectedCategory]);
+
+  // Debug output for troubleshooting
+  if (loading) return <div className="p-10">Loading products...</div>;
+  if (error) return <div className="p-10 text-red-600">{error}</div>;
+  // Debug: show product count and sample data
+  if (!loading && !error) {
+    console.info('Products loaded:', products.length, products);
+  }
 
   // If series, category, and colorway are specified, show gender variants
   if (series && category && colorway) {
@@ -56,7 +80,11 @@ export default function Products() {
           >
             <div className="flex justify-center aspect-[3/4]">
               <img
-                src={hoveredId === p.id ? p.images[2] : p.images[1]}
+                src={
+                  hoveredId === p.id
+                    ? (p.images && p.images[2] ? p.images[2].replace(/^\.\.\/\.\.\/images\//, '/images/') : p.images[0]?.replace(/^\.\.\/\.\.\/images\//, '/images/') || "")
+                    : (p.images && p.images[1] ? p.images[1].replace(/^\.\.\/\.\.\/images\//, '/images/') : p.images[0]?.replace(/^\.\.\/\.\.\/images\//, '/images/') || "")
+                }
                 alt={p.name}
                 className="w-full h-full object-cover rounded-xl transition-opacity duration-300"
               />
@@ -106,7 +134,11 @@ export default function Products() {
             {/* Product Image */}
             <div className="flex justify-center aspect-[3/4]">
               <img
-                src={hoveredId === p.id ? p.images[2] : p.images[1]}
+                src={
+                  hoveredId === p.id
+                    ? (p.images && p.images[2] ? p.images[2].replace(/^\.\.\/\.\.\/images\//, '/images/') : p.images[0]?.replace(/^\.\.\/\.\.\/images\//, '/images/') || "")
+                    : (p.images && p.images[1] ? p.images[1].replace(/^\.\.\/\.\.\/images\//, '/images/') : p.images[0]?.replace(/^\.\.\/\.\.\/images\//, '/images/') || "")
+                }
                 alt={p.name}
                 className="w-full h-full object-cover rounded-xl transition-opacity duration-300"
               />
@@ -212,7 +244,7 @@ export default function Products() {
           >
             <div className="flex justify-center aspect-[3.5/4]">
               <img
-                src={p.images[0]}
+                src={p.images && p.images[0] ? p.images[0].replace(/^\.\.\/\.\.\/images\//, '/images/') : ""}
                 alt={p.name}
                 className="w-full h-full object-cover rounded-xl"
               />
@@ -245,4 +277,6 @@ export default function Products() {
       </div>
     </div>
   );
-}
+};
+
+export default Products;

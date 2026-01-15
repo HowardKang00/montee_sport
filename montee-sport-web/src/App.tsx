@@ -12,6 +12,9 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Orders from "./pages/Orders";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminProducts from "./pages/AdminProducts";
+import AdminUsers from "./pages/AdminUsers";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -38,6 +41,7 @@ function AppRoutes() {
     const token = params.get("token");
     if (token) {
       setToken(token);
+      localStorage.setItem('token', token);
       fetchUser(token);
       navigate("/", { replace: true });
     }
@@ -53,7 +57,13 @@ function AppRoutes() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/product/:id" element={<ProductDetail />} />
-          
+
+          {/* Admin Dashboard and nested routes */}
+          <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}>
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="users" element={<AdminUsers />} />
+          </Route>
+
           {/* Protected Routes */}
           <Route path="/profile" element={
             <ProtectedRoute>
@@ -85,7 +95,7 @@ function AppRoutes() {
               <p className="text-center mt-20 text-xl">❌ Payment Failed</p>
             </ProtectedRoute>
           } />
-          
+
           <Route
             path="*"
             element={

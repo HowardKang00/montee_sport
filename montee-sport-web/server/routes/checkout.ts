@@ -5,6 +5,10 @@ import { PrismaClient } from "../../src/generated/prisma";
 import type { XenditInvoice } from "../types/xendit";
 import { auth } from "../middleware/auth";
 
+// Biteship API config
+const BITESHIP_API_KEY = process.env.BITESHIP_API_KEY;
+const BITESHIP_API_URL = "https://api.biteship.com/v1";
+
 const router = express.Router();
 const prisma = new PrismaClient();
 
@@ -22,12 +26,12 @@ interface Product {
 }
 
 router.post("/checkout", auth, async (req, res) => {
-  if (!process.env.XENDIT_SECRET_KEY || !process.env.FRONTEND_URL) {
+  if (!process.env.XENDIT_SECRET_KEY || !process.env.FRONTEND_URL || !BITESHIP_API_KEY) {
     console.error('Missing required environment variables');
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
-  const { cart, shippingAddress } = req.body as { 
+  const { cart, shippingAddress, courierCode } = req.body as { 
     cart: CartItem[], 
     shippingAddress: {
       street: string;
@@ -35,7 +39,8 @@ router.post("/checkout", auth, async (req, res) => {
       state: string;
       postalCode: string;
       country: string;
-    }
+    },
+    courierCode?: string
   };
 
   // Validate cart and shipping address
@@ -94,12 +99,77 @@ router.post("/checkout", auth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid total amount' });
     }
 
-    // Create order with items
+    // --- Biteship: Get available couriers and rates ---
+    // For demo, use hardcoded origin (Jakarta) and destination from shippingAddress
+    // You should replace origin with your warehouse address
+    const origin = {
+      postal_code: "10110", // Jakarta Pusat
+      country: "ID"
+    };
+    const destination = {
+      postal_code: shippingAddress.postalCode,
+      country: "ID"
+    };
+
+    // Get rates from Biteship
+    const biteshipRes = await fetch(`${BITESHIP_API_URL}/rates/couriers`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${BITESHIP_API_KEY}`
+      },
+      body: JSON.stringify({
+        origin,
+        destination,
+        couriers: ["jne", "sicepat", "anteraja", "jnt"], // Example couriers
+        // You can add package details here if needed
+      })
+    });
+
+    if (!biteshipRes.ok) {
+      const error = await biteshipRes.text();
+      console.error("Biteship API error:", error);
+      return res.status(400).json({ error: "Failed to get courier rates" });
+    }
+
+    const biteshipData = await biteshipRes.json() as { couriers: any[] };
+    // biteshipData contains available couriers and rates
+
+    // Type guard to ensure biteshipData has couriers property
+    if (
+      !biteshipData ||
+      typeof biteshipData !== "object" ||
+      !Array.isArray(biteshipData.couriers)
+    ) {
+      return res.status(400).json({ error: "Invalid response from Biteship API" });
+    }
+    const couriers = biteshipData.couriers;
+
+    // If courierCode is provided, find selected courier and cost
+    let selectedCourier = null;
+    let shippingCost = 0;
+    if (courierCode) {
+      for (const courier of couriers) {
+        for (const service of courier.courier_services) {
+          if (service.courier_code === courierCode) {
+            selectedCourier = service;
+            shippingCost = service.price;
+            break;
+          }
+        }
+        if (selectedCourier) break;
+      }
+      if (!selectedCourier) {
+        return res.status(400).json({ error: "Selected courier not found" });
+      }
+    }
+
+    // Create order with items, include shipping cost
     const order = await prisma.order.create({
       data: {
         externalId: `order-${Date.now()}-${userId}`,
         userId,
-        amount: total,
+        amount: total + shippingCost,
         status: "PENDING",
         shippingAddress: JSON.stringify(shippingAddress),
         orderItems: {
@@ -152,7 +222,7 @@ router.post("/checkout", auth, async (req, res) => {
       },
       body: JSON.stringify({
         external_id: order.externalId,
-        amount: total,
+        amount: total + shippingCost,
         payer_email: user.email,
         description: `Order #${order.id}`,
         success_redirect_url: `${process.env.FRONTEND_URL}/order/${order.id}`,
@@ -171,7 +241,8 @@ router.post("/checkout", auth, async (req, res) => {
     return res.json({ 
       invoiceUrl: invoice.invoice_url, 
       orderId: order.id,
-      order: order 
+      order: order,
+      biteshipCouriers: biteshipData.couriers // Return available couriers for frontend
     });
   } catch (err) {
     console.error("Checkout error:", err);

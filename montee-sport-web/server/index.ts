@@ -4,13 +4,14 @@ import dotenv from "dotenv";
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { PrismaClient } from "../src/generated/prisma";
+import productRoutes from "./routes/products";
 import orderRoutes from "./routes/orderStatus";
 import checkoutRoutes from "./routes/checkout";
 import webhookRoutes from "./routes/webhook";
 import userRoutes from "./routes/users";
 import session from 'express-session';
 import passport from './auth/google'; // path to your passport config
-import jwt from 'jsonwebtoken';
+import { issueGoogleJwt } from './auth/google';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,10 +28,13 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+import adminRoutes from "./routes/admin";
 app.use("/api/users", userRoutes);
 app.use("/api/order-status", orderRoutes);
 app.use("/api/cart", checkoutRoutes);
 app.use("/api/xendit", webhookRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/products", productRoutes);
 app.use(session({ secret: 'your-session-secret', resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -44,7 +48,7 @@ app.get('/api/auth/google/callback',
   (req, res) => {
     // Issue JWT and redirect or respond with token
     const user = req.user as any;
-    const token = jwt.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET!, { expiresIn: '7d' });
+    const token = issueGoogleJwt(user);
     // Option 1: Redirect to frontend with token in query
     res.redirect(`http://localhost:5173/oauth-success?token=${token}`);
     // Option 2: Send token as JSON

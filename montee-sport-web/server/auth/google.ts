@@ -15,7 +15,7 @@ passport.use(new GoogleStrategy({
   const email = profile.emails && profile.emails.length > 0 ? profile.emails[0].value : '';
   let user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
-    user = await prisma.user.create({
+    await prisma.user.create({
       data: {
         email,
         firstName: profile.name?.givenName || '',
@@ -25,7 +25,13 @@ passport.use(new GoogleStrategy({
       }
     });
   }
-  done(null, user);
+  // Always fetch user with role after creation or lookup
+  const userWithRole = await prisma.user.findUnique({ where: { email } });
+  if (userWithRole) {
+    done(null, userWithRole);
+  } else {
+    done(undefined, undefined);
+  }
 }));
 
 passport.serializeUser((user: any, done) => {
@@ -36,5 +42,14 @@ passport.deserializeUser(async (id: number, done) => {
   const user = await prisma.user.findUnique({ where: { id } });
   done(null, user);
 });
+
+// Helper to issue JWT for Google OAuth
+export function issueGoogleJwt(user: any) {
+  return jwt.sign(
+    { userId: user.id, email: user.email, role: user.role },
+    process.env.JWT_SECRET!,
+    { expiresIn: '7d' }
+  );
+}
 
 export default passport;

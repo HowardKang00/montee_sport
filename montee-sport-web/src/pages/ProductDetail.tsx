@@ -1,47 +1,67 @@
 // web/src/pages/ProductDetail.tsx
 import { useParams } from "react-router-dom";
-import { useState } from "react";
-import { products } from "../data/products";
+import { useState, useEffect } from "react";
+import { fetchProducts } from "../data/products";
+import type { Product } from "../data/products";
 import { useCart } from "../context/CartContext";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
-  const product = products.find((p) => p.id === id);
   const { addToCart } = useCart();
-
-  if (!product) return <div className="p-8 text-red-500">Product not found</div>;
-
-  const [mainImg, setMainImg] = useState(product.images[1]);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [mainImg, setMainImg] = useState<string | undefined>(undefined);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState(1); // <-- NEW
+  const [quantity, setQuantity] = useState(1);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchProducts()
+      .then((data) => {
+        const found = data.find((p) => p.id === id);
+        setProduct(found || null);
+        setMainImg(found?.images?.[1] || found?.images?.[0] || "");
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load product");
+        setLoading(false);
+      });
+  }, [id]);
 
   const handleAddToCart = () => {
-    if (!selectedSize) return alert("Please select a size first");
+    if (!selectedSize || !product) return alert("Please select a size first");
     let productId = (`${product.id}-${selectedSize}`);
-    addToCart({
-      id: productId,
-      productId: product.id,
-      name: product.name,
-      price: product.discount
-        ? product.price - (product.price * product.discount) / 100
-        : product.price,
-      quantity: quantity,
-      img: mainImg,
-      size: selectedSize,
-      gender: product.gender,
-      category: product.category
-    });
-
-    // Reset quantity back to 1 after adding to cart
+        addToCart({
+          id: productId,
+          productId: product.id,
+          name: product.name,
+          price: product.discount
+            ? product.price - (product.price * product.discount) / 100
+            : product.price,
+          quantity: quantity,
+          img: mainImg ? mainImg : product.images[1],
+          size: selectedSize,
+          gender: product.gender,
+          category: product.category
+        });
     setQuantity(1);
   };
+
+  if (loading) return <div className="p-8">Loading...</div>;
+  if (error) return <div className="p-8 text-red-500">{error}</div>;
+  if (!product) return <div className="p-8 text-red-500">Product not found</div>;
+
 
   return (
     <div className="p-8 grid grid-cols-1 md:grid-cols-5 gap-10">
       {/* LEFT: Main Image + Thumbnails */}
       <div className="md:col-span-3 grid md:grid-cols-3 lg:grid-cols-2 gap-1">
-        {product.images.slice(1).map((img, i) => (
+        {(product.images && product.images.length > 1
+          ? product.images.slice(1)
+          : product.images
+        ).map((img, i) => (
           <img
             key={i}
             src={img}
@@ -80,11 +100,11 @@ export default function ProductDetail() {
         )}
 
         {/* Sizes */}
-        {product.sizes?.length > 0 && (
+  {product.sizes && product.sizes.length > 0 && (
           <>
             <div className="flex justify-between items-center mb-2">
               <label className="font-semibold text-gray-700">Select Size</label>
-              {product.sizeCharts.length > 0 && (
+              {product.sizeCharts && product.sizeCharts.length > 0 && (
                 <button
                   onClick={() => setIsDrawerOpen(true)}
                   className="text-sm underline text-gray-600 hover:text-black"
@@ -95,7 +115,7 @@ export default function ProductDetail() {
             </div>
 
             <div className="grid grid-cols-3 gap-4 mb-6 text-gray-700">
-              {product.sizes.map((size) => (
+              {product.sizes && product.sizes.map((size) => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
@@ -166,7 +186,7 @@ export default function ProductDetail() {
               </button>
             </div>
             <div className="space-y-4">
-              {product.sizeCharts.map((chart, i) => (
+              {product.sizeCharts && product.sizeCharts.map((chart, i) => (
                 <img
                   key={i}
                   src={chart}

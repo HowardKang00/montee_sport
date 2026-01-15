@@ -12,7 +12,7 @@ export default function ProductCard({ product }: { product: any }) {
       transition={{ type: "spring", stiffness: 200 }}
     >
       <img
-        src={product.image}
+        src={product.images && product.images[0] ? product.images[0] : ""}
         alt={product.name}
         className="w-full h-64 object-cover"
       />
@@ -20,7 +20,9 @@ export default function ProductCard({ product }: { product: any }) {
       <div className="p-4 flex-1 flex flex-col justify-between">
         <div>
           <h3 className="font-serif text-xl mb-1">{product.name}</h3>
-          <p className="font-sans text-gray-600">${product.price}</p>
+          <p className="font-sans text-gray-600">
+            Rp{product.price ? Number(product.price).toLocaleString("id-ID") : ""}
+          </p>
         </div>
 
         <motion.button

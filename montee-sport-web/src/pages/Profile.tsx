@@ -10,6 +10,56 @@ export default function Profile() {
     phoneNumber: user?.phoneNumber || ''
   });
   const [message, setMessage] = useState({ type: '', content: '' });
+  const [editingAddressId, setEditingAddressId] = useState<number|null>(null);
+  const [addressForm, setAddressForm] = useState({
+    street: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: '',
+    isDefault: false
+  });
+  const handleEditAddress = (addr: any) => {
+    setEditingAddressId(addr.id);
+    setAddressForm({
+      street: addr.street,
+      city: addr.city,
+      state: addr.state,
+      postalCode: addr.postalCode,
+      country: addr.country,
+      isDefault: !!addr.isDefault
+    });
+  };
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setAddressForm(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleAddressSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage({ type: '', content: '' });
+    try {
+      const response = await fetch(`http://localhost:4000/api/users/address/${editingAddressId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(addressForm)
+      });
+      if (!response.ok) throw new Error('Failed to update address');
+      const data = await response.json();
+      setUser(data); // update context
+      setMessage({ type: 'success', content: 'Address updated successfully!' });
+      setEditingAddressId(null);
+    } catch (error) {
+      setMessage({ type: 'error', content: 'Failed to update address' });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,9 +112,10 @@ export default function Profile() {
         </div>
       )}
 
+
       <div className="bg-white shadow rounded-lg p-6 mb-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Personal Information</h2>
+          <h2 className="text-xl font-semibold text-gray-700">Personal Information</h2>
           <button
             onClick={() => setIsEditing(!isEditing)}
             className="text-indigo-600 hover:text-indigo-800"
@@ -108,6 +159,79 @@ export default function Profile() {
               />
             </div>
 
+            {/* Address fields below phone number, with title */}
+            {user.address && user.address.length > 0 && (
+              <>
+                <div className="pt-4">
+                  <label className="block text-sm font-medium text-gray-700">Address</label>
+                </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {user.address.map((addr) => (
+                    <div key={addr.id} className="border rounded-lg p-4 mb-4">
+                      {editingAddressId === addr.id ? (
+                        <form onSubmit={handleAddressSave} className="space-y-2">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Street</label>
+                            <input type="text" name="street" value={addressForm.street} onChange={handleAddressChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">City</label>
+                              <input type="text" name="city" value={addressForm.city} onChange={handleAddressChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">State</label>
+                              <input type="text" name="state" value={addressForm.state} onChange={handleAddressChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Postal Code</label>
+                              <input type="text" name="postalCode" value={addressForm.postalCode} onChange={handleAddressChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Country</label>
+                              <input type="text" name="country" value={addressForm.country} onChange={handleAddressChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="inline-flex items-center">
+                              <input type="checkbox" name="isDefault" checked={addressForm.isDefault} onChange={handleAddressChange} className="mr-2" />
+                              <span className="text-sm">Set as default address</span>
+                            </label>
+                          </div>
+                          <div className="flex gap-2 pt-2">
+                            <button type="submit" className="bg-indigo-600 text-white px-3 py-1 rounded">Save</button>
+                            <button type="button" className="bg-gray-300 text-gray-700 px-3 py-1 rounded" onClick={() => setEditingAddressId(null)}>Cancel</button>
+                          </div>
+                        </form>
+                      ) : (
+                        <>
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex items-center">
+                              <span className="text-sm font-medium">
+                                {addr.isDefault && (
+                                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded mr-2">
+                                    Default
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                            <button className="text-indigo-600 hover:text-indigo-800 text-sm" onClick={() => handleEditAddress(addr)}>Edit</button>
+                          </div>
+                          <div className="space-y-2 text-sm text-gray-600">
+                            <p>{addr.street}</p>
+                            <p>{addr.city}, {addr.state} {addr.postalCode}</p>
+                            <p>{addr.country}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
             <div className="pt-4">
               <button
                 type="submit"
@@ -131,34 +255,37 @@ export default function Profile() {
               <h3 className="text-sm font-medium text-gray-500">Phone Number</h3>
               <p className="mt-1 text-sm text-gray-900">{user.phoneNumber || 'Not provided'}</p>
             </div>
-          </div>
-        )}
-      </div>
-
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-6">Addresses</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          {user.address?.map((addr) => (
-            <div key={addr.id} className="border rounded-lg p-4">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center">
-                  <span className="text-sm font-medium">
-                    {addr.isDefault && (
-                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded mr-2">
-                        Default
-                      </span>
-                    )}
-                  </span>
+            {/* Show addresses in view mode too, with title */}
+            {user.address && user.address.length > 0 && (
+              <div className="pt-4">
+                <label className="block text-sm font-medium text-gray-700">Address</label>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {user.address.map((addr) => (
+                    <div key={addr.id} className="border rounded-lg p-4 mb-4">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium">
+                            {addr.isDefault && (
+                              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded mr-2">
+                                Default
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <button className="text-indigo-600 hover:text-indigo-800 text-sm" onClick={() => handleEditAddress(addr)}>Edit</button>
+                      </div>
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <p>{addr.street}</p>
+                        <p>{addr.city}, {addr.state} {addr.postalCode}</p>
+                        <p>{addr.country}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="space-y-2 text-sm text-gray-600">
-                <p>{addr.street}</p>
-                <p>{addr.city}, {addr.state} {addr.postalCode}</p>
-                <p>{addr.country}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

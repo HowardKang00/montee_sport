@@ -1,5 +1,6 @@
 // web/src/context/CartContext.tsx
 import { createContext, useContext, useState, type ReactNode } from "react";
+import { useEffect } from "react";
 
 type CartItem = {
   id: string;
@@ -28,40 +29,69 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    const stored = localStorage.getItem("cart");
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {}
+    }
+    return [];
+  });
+  // (No need for useEffect to load cart from localStorage)
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
   const [orderExternalId, setOrderExternalId] = useState<string | null>(null);
 
   const addToCart = (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.id === item.id && i.size === item.size);
+      let updated;
       if (existing) {
-        return prev.map((i) =>
+        updated = prev.map((i) =>
           i.id === item.id && i.size === item.size
             ? { ...i, quantity: i.quantity + (item.quantity || 1) }
             : i
         );
+      } else {
+        updated = [...prev, { ...item, quantity: item.quantity || 1 } as CartItem];
       }
-      return [...prev, { ...item, quantity: item.quantity || 1 } as CartItem];
+      localStorage.setItem("cart", JSON.stringify(updated));
+      return updated;
     });
   };
 
   const removeFromCart = (id: string) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+    setCart((prev) => {
+      const updated = prev.filter((item) => item.id !== id);
+      localStorage.setItem("cart", JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const updateQty = (id: string, quantity: number) => {
-    setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
-    );
+    setCart((prev) => {
+      const updated = prev.map((item) => (item.id === id ? { ...item, quantity } : item));
+      localStorage.setItem("cart", JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const updateImg = (id: string, img: string) => {
-    setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, img } : item))
-    );
+    setCart((prev) => {
+      const updated = prev.map((item) => (item.id === id ? { ...item, img } : item));
+      localStorage.setItem("cart", JSON.stringify(updated));
+      return updated;
+    });
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem("cart");
+  };
 
   const checkoutCart = async (): Promise<string | null> => {
     try {

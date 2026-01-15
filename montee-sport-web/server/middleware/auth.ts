@@ -12,8 +12,8 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
       userId: number;
       email: string;
+      role: string;
     };
-
     req.user = decoded;
     next();
   } catch (error) {
